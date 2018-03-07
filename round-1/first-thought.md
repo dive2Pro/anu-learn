@@ -13,7 +13,8 @@
 - [ ] propTypes
 - [ ] diff 算法
 - [x] jsx 语法
-
+- [ ] Component
+- [ ] Element
 
 ## jsx
 > 在日常的使用中, 除了 react 本身以外, 不论是 smart / dump component, 使用最多的 就是 jsx
@@ -24,11 +25,12 @@ jsx 是语法糖, 在 babel 或者 typescript 的转义过程中, <MyComponent f
     React.createElement(MyComponent, { first: 'bis'} , null )
 ```
 
-`<MyComponent first="bis"><Second/></MyComponent>`则会被转化成:
+`<MyComponent first="bis"><Second/><Thrid/></MyComponent>`则会被转化成:
 ```react
     React.createElement(MyComponent, 
         { first: 'bis'} , 
-         React.createElement(Second, null, null)
+         React.createElement(Second, null, null),
+         React.createElement(Third, null, null)
      )
 ```
 
@@ -39,9 +41,17 @@ jsx 是语法糖, 在 babel 或者 typescript 的转义过程中, <MyComponent f
 这是一个递归的流程
 Element 是 immutable 的 , 通过持续的 调用 返回不同的结果
 
-它做了什么呢? 它的意义在哪里?
+它做了什么呢? ≠它的意义在哪里?
 createElement 之后呢? 
-具体都做了什么?
 
 现在 带着这些疑问来看实现: 
 
+TO SEE : createElement.js
+
+* 答 : 
+    1. 具体做了什么?  
+        将在 jsx 中描绘的父子组件关系 收集起来, 并 flatten array child, 使其便于处理
+    2. 意义在哪里?
+        将 React 的 组件🌲构成 转化成 对象的形式, 形成这样一套约束 , 通过跨平台的 渲染方案,达到了 learn once , run everyWhere
+    3. createElement 之后 ?
+        这样的 一个描述 组件🌲的对象生成后, 交给 ReactDOM (render) 或者 React-Native 来渲染,  
