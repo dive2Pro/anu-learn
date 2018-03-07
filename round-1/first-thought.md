@@ -15,7 +15,7 @@
 - [x] jsx 语法
 - [ ] Component
 - [ ] Element
-
+- [ ] cloneElement 
 ## jsx
 > 在日常的使用中, 除了 react 本身以外, 不论是 smart / dump component, 使用最多的 就是 jsx
 > <MyComponent {...props} />
@@ -55,3 +55,9 @@ TO SEE : createElement.js
         将 React 的 组件🌲构成 转化成 对象的形式, 形成这样一套约束 , 通过跨平台的 渲染方案,达到了 learn once , run everyWhere
     3. createElement 之后 ?
         这样的 一个描述 组件🌲的对象生成后, 交给 ReactDOM (render) 或者 React-Native 来渲染,  
+
+## cloneElement
+
+将新的 props 和 exits element 中的 props 进行 merge 得到 props
+
+将 新的 children 替代 exits 的 children

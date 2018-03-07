@@ -177,6 +177,39 @@ export function createElement(type, props) {
 		// 如果已经是一个 element
 		return cloneElement(type, props, children);
 	}
+}
 
+/**
+ * have the original element’s props with the new props merged in shallowly.
+ * New children will replace existing children.
+ * @param type
+ * @param props
+ * @param children
+ */
+function cloneElement(subject, newProps, newChildren) {
+	let type = subject.type
+	let props = subject.props
+	let children = newChildren || subject.children
 
+	newProps = newProps || {}
+
+	for (let name in props) {
+		if (newProps[name] === void 0) {
+			newProps[name] = props[name]
+		}
+	}
+
+	if (newChildren !== void 0) {
+		const length = newChildren.length
+
+		if (length) {
+			let index = 0
+			children = []
+
+			for (let i = 0; i < length ; i ++) {
+				 index = createChild(newChildren[i], children, index)
+			}
+		}
+	}
+	return createElement(type, newProps, children)
 }
