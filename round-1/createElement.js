@@ -13,7 +13,7 @@ function createFragmentShape(children) {
 	};
 }
 
-function createComponentShape(type, props, children) {
+export function createComponentShape(type, props, children) {
 	return {
 		Type: 2,
 		type: type,

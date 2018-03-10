@@ -61,3 +61,15 @@ TO SEE : createElement.js
 将新的 props 和 exits element 中的 props 进行 merge 得到 props
 
 将 新的 children 替代 exits 的 children
+
+## render
+
+### 问题
+1. 它做了什么?
+2. 
+
+* 答:
+    1. 具体做了什么?
+        求得 各个 component / element / function 的结果, 真实 DOM reference
+        这是一个递归的过程, 将 parent 和 children  DOM 结合在一起
+
