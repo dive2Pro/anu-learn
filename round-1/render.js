@@ -1,7 +1,111 @@
-import {createComponentShape, createElement} from './createElement'
+import {createComponentShape, createElement, createEmptyShape} from './createElement'
 function appendNode(newType, newNode, parentNode, nextNode) {
+	// TODO: **instance 是什么?**
+	let instance = newNode.instance
+	let ok = newType === 2 && instance
 
+	if (ok && instance.componentWillMount) {
+		// 不是应该传递 props 吗
+		// 答: 否, React 中不传递任何东西
+		// TODO: 为何要传递 nextNode?
+		instance.componentWillMount(nextNode)
+	}
+
+	parentNode.appendChild(nextNode)
+
+	if (ok && instance.componentDidMount) {
+		instance.componentDidMount(nextNode)
+	}
 }
+
+function updatePropObject(parent, prop, target) {
+	for (let name in prop) {
+		const value = prop[name] || null
+
+		if (name in target ) {
+			target[name] = value
+		}
+		// style properties that don't exist on CSSStyleDeclaration
+		else if (parent === 'style') {
+			value ? target.setProperty(name, value, null) : target.removeProperty(name)
+		}
+	}
+}
+
+function updateProp(target, set, name, value, namespace) {
+	if ( (value === nsSvg || value === nsMath)) {
+		return
+	}
+
+	if (name === 'xlink:href') {
+		target[(set ? 'set' : 'remove') + 'AttributeNS'] (nsXlink, 'href', value)
+		return
+	}
+	let svg = false
+	// svg element , default to class instead of className
+	if (namespace === nsSvg) {
+		svg = true
+
+		if (name === 'className') {
+			name = 'class'
+		} else {
+		}
+	}
+	// html element , default to className instead of class
+	else {
+		if (name === 'class') {
+			name = 'className'
+		}
+	}
+	let destination = target[name]
+	let defined = value != null && value !== false
+
+	if (defined && typeof defined === 'object') {
+		destination === void 0 ? target[name] = value : updatePropObject(name, value, destination)
+	}
+	// primitives `string, number, boolean`
+	else {
+		if (destination !== void 0 && svg === false) {
+			/**
+			 * ** Oh ho ~ **
+			 */
+			if (name === 'style') {
+				target.style.cssText = value
+			} else {
+				target[name] = value
+			}
+		}
+		// set / remove Attribute
+		else {
+			if (defined && set ) {
+				target.setAttribute(name, value === true ? '' : value)
+			} else {
+				target.removeAttribute(name)
+			}
+		}
+	}
+}
+
+const ron = /^on[A-Z]\w+$/
+function isEventProp(name) {
+	return ron.test(name)
+}
+
+function assignProps(target, props, onlyEvents, component) {
+	for (let name in props) {
+		let value = props[name]
+		if (name === 'refs' && value != null) {
+			refs(value, component, target)
+		}
+		else if (isEventProp(name)) {
+			addEventListener(target, name.substring(2).toLocaleLowerCase(), value, component)
+		}
+		else if (onlyEvents === false && name !== 'key' && name !== 'children') {
+			updateProp(target, true, name, value, props.xmlns)
+		}
+	}
+}
+
 function createNode(subject, component, namespace) {
 	let nodeType = subject.Type
 
@@ -114,7 +218,76 @@ function createNode(subject, component, namespace) {
  * @returns {*}
  */
 function createClass (subject, props) {
-	return new subject(props)
+	if (subject == null) {
+		subject = createEmptyShape()
+	}
+
+	// TODO: component cache
+	if (subject.COMPCache !== void 0 ) {
+		return subject.COMPCache
+	}
+
+	const func = typeof subject === 'function'
+
+	// TODO: subject(createElement) ? 做了什么
+	// 如果是 func 传递的 createElement 作为 props 返回的是正确的 shape 吗?
+	// 这里是已经将这个 function 展开了吗?
+	let shape = func ? (subject(createElement) || createEmptyShape()) : subject
+	const type = func && typeof shape === 'function' ? 2 : (shape.Type != null ? 1: 0)
+
+	let vnode
+	let constructor
+	let render
+
+	if (type !== 2 && shape.constructor !== Object && shape.render === void 0) {
+		shape = extractVirtualNode(shape, {props})
+	}
+
+	// elements / functions
+	if( type !== 0) {
+		// 这里 将 function component 转换成 class Component
+		render = type === 1 ? (vnode = shape, function() { return vnode }) : shape
+
+		shape = { render }
+	} else {
+		if (constructor = shape.hasOwnProperty('constructor')) {
+			constructor = shape.constructor
+		}
+
+		if ( typeof shape.render !== 'function') {
+			shape.render = function() { return createEmptyShape() }
+		}
+	}
+
+	function component(props) {
+		if (constructor) {
+			constructor.call(this, props)
+		}
+		Component.call(this, props)
+	}
+
+	component.prototype = shape
+
+	// extends Component class
+	shape.setState = Component.prototype.setState
+	shape.forceUpdate = Component.prototype.forceUpdate
+	component.constructor = component
+
+	if (func) {
+		shape.constructor = subject
+		subject.COMPCache = component
+	}
+
+	if (func || shape.styleSheet !== void 0) {
+		shape.displayName = (
+			shape.displayName ||
+			(func ? subject.name : false) ||
+			((Math.random() + 1).toString(36).substr(2, 5))
+		)
+	}
+
+	return component
+
 }
 /**
  * subject 可以是 <MyComponent/>
@@ -197,10 +370,12 @@ function render(subject, target, callback, hydration) {
 	function renderer(newProps)	 {
 		if (initial) {
 			// appendNode 就是将 true dom 更新
-			apeendNode(nodeType, vnode, element, createNode(vnode, null ,null))
+			appendNode(nodeType, vnode, element, createNode(vnode, null ,null))
 
 			initial = false
 			component = vnode.instance
 		}
+
+		return renderer;
 	}
 }

@@ -69,7 +69,7 @@ function createPortalShape(type, props, children = []) {
 	}
 }
 
-function createEmptyShape() {
+export function createEmptyShape() {
 	return {
 		Type: 1,
 		type: 'noscript',

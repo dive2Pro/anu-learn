@@ -62,11 +62,22 @@ TO SEE : createElement.js
 
 将 新的 children 替代 exits 的 children
 
+## Component 
+1. 它是什么? 
+    在 react 中, 一段可以重复利用的代码, 它有自己的功能和逻辑. 
+    可以由多个不同的 Component 组合而成
+    其结果返回 可以是 Element/Components, 或者 Strings , Array 和 numbers
+2. 它的功能有哪些? 
+    - props 
+        1. readOnly
+        2. passed down from parent Component
+    - state
+        1. 
 ## render
 
 ### 问题
 1. 它做了什么?
-2. 
+2. instance 具体是指什么
 
 * 答:
     1. 具体做了什么?
