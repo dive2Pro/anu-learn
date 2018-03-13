@@ -313,7 +313,7 @@ function render(subject, target, callback, hydration) {
 
 	/**
 	 * TODO: 表示是一个 Component object, 不是 function component?
-	 *
+	 * 否, 此时传递的是一个 带 render 的 对象
 	 */
 	if (subject.render !== void 0) {
 		vnode = createComponentShape(createClass(subject, null), objEmpty, arrEmpty);
