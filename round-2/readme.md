@@ -6,7 +6,8 @@
 2018.3.13 23:27
 
 发现如果不弄明白传入的是组件/函数/类 话 很难进行下一步的逻辑跟踪, 所以现在要搞明白 
-1. createElement 做了什么
+1. createElement 做了什么:
+
 > 接受的参数 1. type , 不管传入的是什么, 对其进行分类
 
 分类的依据是:
@@ -28,6 +29,15 @@
         key:    // TODO
       }
     ```
-2. 传入 对象的话如何处理
+2. 传入 的 subject  的不同处理
+  - <MyComponent /> 和 使用 h(component class) 是一样的, 他们都会被转化成为 vnode
+  - Component class , 如果带 render field , 直接 使用createClass 去将其转化为 vnode
+  - Function , 同样会 createClass 去处理
+  - ...
 3. 传入函数如何处理
  
+
+2018.3.14 16:50
+
+1.createNode 中需要处理 vnode 中的 instance, ['--thrown'] 和 ['--vnode'] 属性, 弄明白他的处理流程
+  - instance
