@@ -1,5 +1,5 @@
 /**
- * 初始化 继承自 Component 的对象,
+ * 初始化 继承自 Component 的对象, 处理 function 和 object
  *  将传入的 非 null subject 包装成 Component, 实际上也是一个 shape
  * @param {object} props
  * @returns {vnode} shape

@@ -35,9 +35,13 @@
   - Function , 同样会 createClass 去处理
   - ...
 3. 传入函数如何处理
- 
+  通过 执行一次拿到结果 vnode
+  - 如果其返回的仍然是一个 函数 将其设置为一个 Component 的render 函数
+  - 返回的是 已经是一个 vnode, 用一个 function 包裹它
 
+  最后通过托管 prototype 到 Component, 完成 Component 化
 2018.3.14 16:50
 
 1.createNode 中需要处理 vnode 中的 instance, ['--thrown'] 和 ['--vnode'] 属性, 弄明白他的处理流程
-  - instance
+  - 
+  - instance : 在 extractComponentNode 中 `new type(propsb)` 赋值
