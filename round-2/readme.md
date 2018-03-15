@@ -45,3 +45,14 @@
 1.createNode 中需要处理 vnode 中的 instance, ['--thrown'] 和 ['--vnode'] 属性, 弄明白他的处理流程
   - 
   - instance : 在 extractComponentNode 中 `new type(propsb)` 赋值
+
+// 23:27
+> ~~~余下两个是在 应该是在Component 中~~~
+  - ['--vnode'] 
+    1. ```Component.render``` 返回 的 root 也是 `Component` 的话
+      1. 子 Component 记录他的 parent Component vnode
+      2. 父 Component 记录的是 root 子 Component 的 vnode
+    2. 返回的是 其他的话, instance 此时一直是 null , 那么 记录的只有 parent 子 root Component
+
+-- 18.3.15 16:40
+  - ['--thrown'] : TODO:  预留, 目前并没有实现 
