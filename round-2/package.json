@@ -1,0 +1,13 @@
+{
+  "name": "round-2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup --config"
+  },
+  "devDependencies": {
+    "rollup": "0.56.0",
+    "rollup-plugin-replace": "^2.0.0"
+  }
+}

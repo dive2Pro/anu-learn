@@ -1,5 +1,6 @@
-import {createClass} from './component/createClass';
-
+import createClass from './component/createClass';
+import { createComponentShape, objEmpty , arrEmpty } from './shapes'
+import {createNode, appendNode} from './vnode'
 /**
  * 摒弃一切 非第一次渲染时的代码!
  * @param {Component | Class | Function} subject
@@ -11,7 +12,8 @@ export default function render(subject, target, callback, hydration) {
   let initial = true
   let vnode
   let element
-
+  let nodeType = 2
+  let component
   if (subject.render !== void 0 ) {
     vnode = createComponentShape(createClass(subject, null), objEmpty, arrEmpty)
   }
@@ -41,7 +43,7 @@ export default function render(subject, target, callback, hydration) {
     element = target === document ? document.body : target
   }
 
-  if (hydration !== null && hydration !== false) {
+  if (hydration != null && hydration !== false) {
 
   } else {
     renderer()
@@ -59,6 +61,7 @@ export default function render(subject, target, callback, hydration) {
       initial = false
       component = vnode.instance
     }
-    return renderer;
+    return component;
   }
+  
 }

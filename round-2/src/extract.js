@@ -1,3 +1,8 @@
+import {Component} from './component/index'
+import createClass from './component/createClass'
+import {createEmptyShape, createComponentShape, createTextShape} from './shapes'
+import {assignDefaultProps} from './props'
+
 /**
  * 
  * @param {(element | Function | vnode)} subject 
@@ -14,10 +19,10 @@ function extractVirtualNode(subject, component) {
 
   // portal
   // ...
-  console.info(subject, 'subject.constructor =' , subject.constructor)
   switch(subject.constructor) {
-    case Component : 
+    case Component : {
       return createComponentShape(subject, objEmpty, arrEmpty)
+    }
     case Boolean: 
       return createEmptyShape()
     case String:
@@ -40,7 +45,7 @@ function extractVirtualNode(subject, component) {
   if (typeof subject.render === 'function') {
     return (
       subject.DOMCache ||
-      createComponentShape(subject.DOMCache = createClass(subject, null), objEmpty, arrEmpty);
+      createComponentShape(subject.DOMCache = createClass(subject, null), objEmpty, arrEmpty)
     )
   }
 }
@@ -62,7 +67,7 @@ export function extractRenderNode(component) {
  * @param {component} instance 
  * @param {vnode} parent 
  */
-function extractComponentNode(subject, instance, parent) {
+export function extractComponentNode(subject, instance, parent) {
   // @type {Component}
   var owner
   var vnode
@@ -138,7 +143,6 @@ function extractComponentNode(subject, instance, parent) {
 function extractFunctionNode (type, props) {
   try{
     var vnode 
-    // TODO: cached ?
     var func  = type['--func'] !== void 0
 
     if (func === false) {

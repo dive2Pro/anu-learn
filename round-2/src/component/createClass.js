@@ -1,11 +1,14 @@
+import {createEmptyShape} from '../shapes'
+import Component from './Component'
+
 /**
  * 初始化 继承自 Component 的对象, 处理 function 和 object
- *  将传入的 非 null subject 包装成 Component, 实际上也是一个 shape
+ * 将传入的 非 null subject 包装成 Component, 实际上也是一个 shape
+ * 
  * @param {object} props
- * @returns {vnode} shape
- *  TODO:  如果 subject 是一个 class ?
+ * @returns {vnode} shape;
  */
-export function createClass(subject, props) {
+export default function createClass(subject, props) {
   if (subject == null) {
     return createEmptyShape()
   }

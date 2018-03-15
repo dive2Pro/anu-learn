@@ -2,6 +2,7 @@ import {applyComponentHook} from './component/lifecycle'
 import { createEmptyShape, createComponentShape, createElementShape,
   createNodeShape
 } from './shapes'
+import {extractComponentNode} from './extract'
 /**
  * 将 nextNode  拼接到 parentNode 中,
  * invoke newNode 的 lifeCycle methods
@@ -10,7 +11,7 @@ import { createEmptyShape, createComponentShape, createElementShape,
  * @param {Node} parentNode 
  * @param {Node} nextNode 
  */
-function appendNode(nodeType, newNode, parentNode, nextNode ) {
+export function appendNode(nodeType, newNode, parentNode, nextNode ) {
   var instance = newNode.instance
   applyComponentHook(instance, 0, nextNode)
 
@@ -28,7 +29,7 @@ function appendNode(nodeType, newNode, parentNode, nextNode ) {
  * @param {string} namespace 
  * @returns {Node} element 真实 DOM 节点
  */
-function createNode(subject, component, namespace) {
+export function createNode(subject, component, namespace) {
   var nodeType = subject.Type
 
   // create text node
@@ -105,7 +106,7 @@ function createDOMNode(type, component) {
   try{
     return document.createElement(type)
   } catch(e) {
-    reutrn document.createComment('create dom node failed , dom type was : ' + type)
+    return document.createComment('create dom node failed , dom type was : ' + type)
   }
 }
 

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script src="./dist/anu.js"></script>
+  <script>
+    const h = anu.createElement;
+    
+    class App extends anu.Component{
+      render() {
+        // return h('h2', null , "Hello World")
+        return "Hello world!"
+      }
+    }
+
+    anu.render(App, document)
+  </script>
+</body>
+</html>

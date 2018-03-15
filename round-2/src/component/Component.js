@@ -1,6 +1,8 @@
 import { objEmpty } from "../shapes";
-
-function Component(props) {
+import {applyComponentHook} from './lifecycle';
+import {assignDefaultProps} from '../props'
+import {extractRenderNode} from '../extract'
+export default function Component(props) {
   // getDefaultProps
 
   // componentWillReceiveProps
@@ -32,18 +34,11 @@ function Component(props) {
 
 
 Component.prototype = {
-  constructor : Component
-  setState : setState
+  constructor : Component,
+  setState : setState,
   forceUpdate : forceUpdate
 }
 
-function assignDefaultProps(defaultProps, nextProps) {
-  for (const name in defaultProps) {
-    if (defaultProps.hasOwnProperty(name) && !nextProps[name]) {
-      nextProps[name] = defaultProps[name]
-    }
-  }
-}
 
 
 function updateState(state, newState) {
@@ -59,7 +54,7 @@ function updateState(state, newState) {
  * @param {Object|(prevState) => newState } partialstate 
  * @param {Function} callback 
  */
-function setstate(partialstate, callback) {
+function setState(partialstate, callback) {
 
   if(applyComponentHook(this, 3, this.props, partialstate) === false ) {
     return
