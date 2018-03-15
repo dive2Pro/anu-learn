@@ -35,7 +35,7 @@ export function createNode(subject, component, namespace) {
   // create text node
 
   if (nodeType === 3) {
-    return subject.DOMNode = document.createTextNode(subject)
+    return subject.DOMNode = document.createTextNode(subject.children)
   }
 
   var vnode 

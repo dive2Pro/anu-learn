@@ -2,7 +2,7 @@ import {Component} from './component/index'
 import createClass from './component/createClass'
 import {createEmptyShape, createComponentShape, createTextShape} from './shapes'
 import {assignDefaultProps} from './props'
-
+import {createElement} from './element/index'
 /**
  * 
  * @param {(element | Function | vnode)} subject 
@@ -93,7 +93,7 @@ export function extractComponentNode(subject, instance, parent) {
     owner = type.COMPCache
   }
   // function component
-  else if (type.constructor === 'Function' && (type.prototype === void 0 || type.render === void 0)) {
+  else if (type.constructor === Function && (type.prototype === void 0 || type.prototype.render === void 0)) {
     vnode = extractFunctionNode(type, props)
 
     if (vnode.Type === void 0) {

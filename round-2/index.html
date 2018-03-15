@@ -10,11 +10,14 @@
   <script src="./dist/anu.js"></script>
   <script>
     const h = anu.createElement;
-    
+    function Help() {
+      return h('h2', null, 'I am hero!')
+    }
     class App extends anu.Component{
       render() {
         // return h('h2', null , "Hello World")
-        return "Hello world!"
+        // return "Hello world!"
+        return h(Help)
       }
     }
 

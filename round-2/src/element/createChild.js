@@ -1,7 +1,7 @@
 import {createComponentShape, createTextShape} from '../shapes'
 
 export function createChild(child, children, index) {
-  if (!child) {
+  if (child) {
     // 证明他已经是 vnode
     if (child.Type !== void 0) {
       children[index ++ ] = child
