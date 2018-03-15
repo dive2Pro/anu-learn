@@ -123,3 +123,18 @@ export function cloneNode(subject) {
       void 0
   );
 }
+
+
+function replaceRootNode(newNode, oldNode, newType, oldType, component) {
+  var refDOMNode = oldNode.DOMNode
+  var newProps = newNode.props
+
+  refDOMNode.parentNode.replaceChild(createNode(newNode, component, null), oldNode)
+  
+  // hydrate new node
+  oldNode.props = newProps;
+  oldNode.nodeName = newNode.nodeName || newNode.type;
+  oldNode.children = newNode.children;
+  oldNode.DOMNode = newNode.DOMNode;
+
+}

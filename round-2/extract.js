@@ -45,7 +45,7 @@ function extractVirtualNode(subject, component) {
   }
 }
 
-function extractRenderNode(component) {
+export function extractRenderNode(component) {
   try{
 
     return extractVirtualNode(

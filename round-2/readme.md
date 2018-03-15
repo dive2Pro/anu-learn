@@ -56,3 +56,17 @@
 
 -- 18.3.15 16:40
   - ['--thrown'] : TODO:  预留, 目前并没有实现 
+
+  createNode 返回递归并且已经创建真实 DOM , 建立 children 和 parent DOM Node 之间关系的 `Node`
+
+
+# Component
+
+- forceUpdate
+    1. 重新 render 一次
+    2. 比较Type 
+      - 同 : 
+          - TextShape : 直接替换 DOMNode.nodeValue
+          - Other : reconcileNodes, 这里进入 diff 算法
+      - 异 : replaceRootNode
+- setState
