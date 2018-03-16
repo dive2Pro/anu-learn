@@ -70,3 +70,13 @@
           - Other : reconcileNodes, 这里进入 diff 算法
       - 异 : replaceRootNode
 - setState
+
+// 16. 11:13
+
+> 现在要进入 setState 使 Component 更新的流程
+// 16:31
+
+1. 首先在 setState 的时候要 shouldComponentUpdate
+  - false return
+  - true continue 
+2. componentReceiveProps 目前是放在 了 Component 的 constructor 方法中 . 现在的做法是 每一次 props 的更改都会重新 new 一个 对象出来, 我认为这个在之后会被改变.

@@ -139,3 +139,59 @@ function replaceRootNode(newNode, oldNode, newType, oldType, component) {
   oldNode.DOMNode = newNode.DOMNode;
 
 }
+
+export function emptyNode(node, length) {
+  var parentNode = node.DOMNode
+  var children = node.children
+  var child 
+
+  for (var i = 0 ; i < children.length ; i ++ ) {
+    child = children [i]
+    var instance = child.instance 
+    applyComponentHook(instance, 6, child.DOMNode)
+    child.DOMNode = null
+  }
+
+
+  parentNode.textContent = ''
+}
+/**
+ * 
+ * @param {number} oldType 
+ * @param {Vnode} oldNode 
+ * @param {Node} parentNode 
+ */
+export function removeNode(oldType, oldNode, parentNode) {
+  var instance = child.instance
+  applyComponentHook(instance, 6, oldNode.DOMNode)
+  parentNode.removeChild(oldNode.DOMNode)
+  // 防止内存泄漏
+  oldNode.DOMNode = null
+}
+
+/**
+ * 
+ * @param {number} newType 
+ * @param {number} oldType 
+ * @param {Vnode} newNode 
+ * @param {Vnode} oldNode 
+ * @param {Node} parentNode 
+ * @param {Vnode} nextNode 
+ */
+export function replaceNode(newType, oldType, newNode, oldNode, parentNode, nextNode ) {
+  // lifecycle invoke
+
+  var instance = oldNode.instance
+
+  applyComponentHook(instance, 6, oldNode.DOMNode)
+
+  instance = newNode.instance
+
+  applyComponentHook(instance, 0, nextNode)
+
+  parentNode.replaceChild(nextNode, oldNode.DOMNode)
+
+  applyComponentHook(instance, 1, nextNode)
+
+  oldNode.DOMNode = null
+}

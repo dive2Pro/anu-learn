@@ -50,6 +50,12 @@ function extractVirtualNode(subject, component) {
   }
 }
 
+/**
+ * 重新 执行 render 方法
+ * 
+ * @param {Component} component 
+ * @return {Vnode} Vnode
+ */
 export function extractRenderNode(component) {
   try{
 

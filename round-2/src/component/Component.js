@@ -2,6 +2,7 @@ import { objEmpty } from "../shapes";
 import {applyComponentHook} from './lifecycle';
 import {assignDefaultProps} from '../props'
 import {extractRenderNode} from '../extract'
+import { reconcileNodes } from '../reconcile'
 export default function Component(props) {
   // getDefaultProps
 
