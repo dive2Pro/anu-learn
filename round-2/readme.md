@@ -76,7 +76,20 @@
 > 现在要进入 setState 使 Component 更新的流程
 // 16:31
 
-1. 首先在 setState 的时候要 shouldComponentUpdate
+1.  首先在 setState 的时候要 shouldComponentUpdate
   - false return
   - true continue 
-2. componentReceiveProps 目前是放在 了 Component 的 constructor 方法中 . 现在的做法是 每一次 props 的更改都会重新 new 一个 对象出来, 我认为这个在之后会被改变.
+  更新 state 到 最新的
+2.  componentReceiveProps 目前是放在 了 Component 的 constructor 方法中 . 现在的做法是 每一次 props 的更改都会重新 new 一个 对象出来, 我认为这个在之后会被改变.
+
+3.  componentWillUpdate 
+   extractRenderNode -> 通过重新 render 返回新的 Component / Element  =>  newNode
+   oldNode = this['--vnode'] 
+
+    比较两者的节点类型:
+      - 同 , 进入 diff 算法  reconcileNodes
+      - 异 , 直接替换   replaceRootNode -> oldNode.DOMNode.parentNode.replaceChild(createNode(newNode), oldNode.DOMNode)
+
+4.  reconcileNodes
+    目的在于 找出 children 中的各个  新旧 child 的不同点 , 该不同点即用于 DOMNode 操作新 node
+    

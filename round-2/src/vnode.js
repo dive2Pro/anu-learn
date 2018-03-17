@@ -1,8 +1,9 @@
 import {applyComponentHook} from './component/lifecycle'
 import { createEmptyShape, createComponentShape, createElementShape,
-  createNodeShape
+  createNodeShape, objEmpty
 } from './shapes'
 import {extractComponentNode} from './extract'
+import {assignProps} from './props'
 /**
  * 将 nextNode  拼接到 parentNode 中,
  * invoke newNode 的 lifeCycle methods
@@ -91,8 +92,7 @@ export function createNode(subject, component, namespace) {
   }
 
   if (props !== objEmpty) {
-    // TODO: until Component finished
-    // assignProps(element, props, false, component)
+    assignProps(element, props, false, component)
   }
 
   return element

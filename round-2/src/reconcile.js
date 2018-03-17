@@ -1,6 +1,8 @@
 import {extractComponentNode} from './extract'
 import {emptyNode, removeNode, createNode, replaceNode} from './vnode'
 import { nodeEmpty } from './shapes';
+import {patchProps} from './props'
+import {applyComponentHook} from './component/lifecycle'
 /**
  * reconcile nodes 
  * 这里 要去渲染的是 children
@@ -94,6 +96,8 @@ export function reconcileNodes(newNode, oldNode, newNodeType, oldNodeType) {
       }
     }
   }
-
+  if (newNode.props != oldNode.props) {
+    patchProps(currentNode, oldNode)
+  }
   applyComponentHook(oldComponent, 5, newProps, newState)
 }
