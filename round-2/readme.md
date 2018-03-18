@@ -92,4 +92,12 @@
 
 4.  reconcileNodes
     目的在于 找出 children 中的各个  新旧 child 的不同点 , 该不同点即用于 DOMNode 操作新 node
-    
+    // 18.3.18 23:35
+     reconcileKeys
+     已经在 方法的 doc 中写出
+
+这一版本的 copy & read 代码 告一段落.
+
+TODO: 18.3.20 回顾并理清逻辑, 重点在 大的抽象上面
+
+下面会进入 round-3, 此时 代码被重写, 所以这又是一次 copy & read 的过程 FIGHTING 👨‍💻‍👨‍💻‍

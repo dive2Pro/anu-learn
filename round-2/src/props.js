@@ -90,11 +90,11 @@ export function updatePropObject(parent, prop, target) {
   for (const name in prop) {
     if (prop.hasOwnProperty(name)) {
       const value = prop[name] || null
-      if (name in target) {
+      if (parent === 'style') {
+        // value ? target.setProperty(name, value, null) : target.removeProperty(name)
+        target[name] = value ? value : ''
+      } else if (name in target) {
         target[name] = prop
-      }
-      else if (parent === 'style') {
-        value ? target.setProperty(name, value, null) : target.removeProperty(name)
       }
       
     }
@@ -128,11 +128,11 @@ export function assignProps(target, props, onlyEvent, component) {
         refs(value, component, element)
       } else if (isEventProp(name)) {
         addEventListener(target, name.substr(2).toLocaleLowerCase(), value, component)
-     } else {
-       if (onlyEvent !== false && name !== 'key' && name !== 'children') {
-         updateProp(target, true, name, value)
-       }
-     }
+      } else {
+       if (onlyEvent === false && name !== 'key' && name !== 'children') {
+        updateProp(target, true, name, value)
+        }
+      }
+    }
   }
-}
 }

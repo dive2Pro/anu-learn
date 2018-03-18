@@ -126,11 +126,11 @@ export function cloneNode(subject) {
 }
 
 
-function replaceRootNode(newNode, oldNode, newType, oldType, component) {
+export function replaceRootNode(newNode, oldNode, newType, oldType, component) {
   var refDOMNode = oldNode.DOMNode
   var newProps = newNode.props
 
-  refDOMNode.parentNode.replaceChild(createNode(newNode, component, null), oldNode)
+  refDOMNode.parentNode.replaceChild(createNode(newNode, component, null), refDOMNode)
   
   // hydrate new node
   oldNode.props = newProps;

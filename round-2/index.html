@@ -7,11 +7,19 @@
   <title>Document</title>
 </head>
 <body>
+  <div id="array"></div>
   <script src="./dist/anu.js"></script>
+
   <script>
     const h = anu.createElement;
-    function Help(props) {
-      return h('h2', null, 'I am hero!' + props.title)
+    class Help extends anu.Component {
+      constructor(props) {
+        super(props)
+      }
+      render () {
+        const props = this.props
+        return h('h2', null, 'I am hero!' + props.title)
+      }
     }
     class App extends anu.Component{
       constructor(props) {
@@ -41,5 +49,80 @@
 
     anu.render(App, document)
   </script>
+  <script>
+  function Item (props){
+    return h('div', {style: { backgroundColor : `hsl(${props.index * 20} ,100%, 50%)`}} , 
+    props.index + '',
+    h('input')
+  )
+  }
+  let items = [
+          1, 2,3,4,5,6
+        ]
+  
+  function shuffle() {
+    const first = items[0]
+    items = items.slice(1)
+    items.push(first)
+  }
+  class List extends anu.Component {
+    constructor(props) {
+      super(props)
+      this._renderItems = this._renderItems.bind(this)
+      this._renderNoKeysItems = this._renderNoKeysItems.bind(this)
+      this._renderNoKeysContainers = this._renderNoKeysContainers.bind(this)
+      this._renderWithKeysContainers = this._renderWithKeysContainers.bind(this)
+      this._renderWithKeysItems = this._renderWithKeysItems.bind(this)
+      this.state = { items }
+    }
+    componentDidMount() {
+     setInterval(() => {
+       shuffle()
+       this.setState({
+         items: items
+       })
+     } , 1000)
+
+    }
+    _renderItems () {
+      return this.state.items.map((item, index) => {
+        return h(Item, {item, index});
+      })
+    }
+    _renderNoKeysItems () {
+      return h('section', null , this._renderItems())
+    }
+    _renderWithKeysItems() {
+      return h('section', null, this.state.items.map((item,index) => {
+        return h(Item, {item, index, key: item})
+      }))
+    }
+    _renderNoKeysContainers() {
+      return h('article', null,
+        h('section', null , h('h2', null, 'witought keys'), this._renderNoKeysItems())
+      )
+    }
+    _renderWithKeysContainers() {
+      return h('article', null,
+        h('section', null , h('h2', null, 'with keys'), this._renderWithKeysItems())
+      )
+    }
+
+    render() {
+      return h('main', null, this._renderNoKeysContainers(), this._renderWithKeysContainers())
+    }
+  }
+  anu.render(List, document.querySelector('#array'))
+  </script>
+  <style>
+    section {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    #array div{
+      height: 50px;
+      width: 50px;
+    }
+  </style>
 </body>
 </html>

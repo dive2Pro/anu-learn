@@ -3,6 +3,7 @@ import {applyComponentHook} from './lifecycle';
 import {assignDefaultProps} from '../props'
 import {extractRenderNode} from '../extract'
 import { reconcileNodes } from '../reconcile'
+import {replaceRootNode} from '../vnode'
 export default function Component(props) {
   // getDefaultProps
 
