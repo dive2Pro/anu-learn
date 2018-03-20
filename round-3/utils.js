@@ -26,3 +26,22 @@ export function extend(target, source = {}) {
 export function isComponent(type) {
   return typeof type === 'function'
 }
+var lowerCache = {}
+
+export function toLowerCase(s) {
+    return lowerCache[s] || (lowerCache[s] = s.toLowerCase())
+}
+export function isSameType(dom, vnode) {
+  if (dom['__type']) {
+    return dom['__type'] === vnode.type
+  }
+  return toLowerCase(dom.nodeName)  === vnode.type
+}
+
+export function matchInstance(instance, Type) {
+  do {
+    if (instance instanceof Type) {
+      return instance
+    }
+  } while (instance = instance.parentInstance);
+}
