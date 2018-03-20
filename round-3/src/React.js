@@ -1,4 +1,4 @@
-import {toDom} from 'Component'
+import {toDom, Component} from 'Component'
 import {extend} from './utils'
 
 /**
@@ -83,7 +83,8 @@ function render(vnode, container) {
 }
 const React = {
   render,
-  createElement
+  createElement,
+  Component
 }
 window.ReactDOM = React
 window.React = React

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="./dist/React.js"></script>
+    <!-- <script src="http://cdn.bootcss.com/react/15.4.1/react.js"></script>
+    <script src="http://cdn.bootcss.com/react/15.4.1/react-dom.js"></script>-->
+    <script>
+
+      console.log(React)
+        class B extends React.Component{
+        	render() {
+        		return React.createElement("div", this.props)
+            }
+        }
+        class Root extends React.Component {
+            constructor(props) {
+                super(props)
+                this.state = {
+                    items: ['aaa', 'bbb', 'ccc']
+                }
+            }
+
+            handleClick() {
+                let {
+                    items
+                } = this.state
+
+                items.push('new-item')
+                console.log(items)
+                this.setState({
+                    items
+                })
+
+            }
+            render() {
+                return React.createElement(B, null,
+                    React.createElement('button', {
+                        onClick: this.handleClick.bind(this)
+                    }, '点我'),
+                    React.createElement(ItemList, {
+                        items: this.state.items
+                    })
+                )
+            }
+        }
+        class ItemList extends React.PureComponent {
+
+            render() {
+                return React.createElement('ul', null,
+                    this.props.items.map(function(el) {
+                        return React.createElement('li', null, el)
+                    })
+                )
+            }
+        }
+        window.onload = function() {
+            ReactDOM.render(React.createElement(Root, null), document.body)
+        }
+    </script>
+</head>
+
+<body>
+    <div>这个默认会被清掉</div>
+</body>
+
+</html>

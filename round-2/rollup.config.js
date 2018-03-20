@@ -3,7 +3,6 @@
 // import commonjs from 'rollup-plugin-commonjs';
 import replace from 'rollup-plugin-replace';
 
-console.log(`Hello`)
 export default {
     input: 'src/index.js',
     output: {

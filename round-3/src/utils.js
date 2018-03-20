@@ -12,7 +12,9 @@ export function getInstances(instance) {
 
   return instances
 }
-
+export function clone(obj) {
+  return extend({}, obj)
+}
 
 export function extend(target, source = {}) {
   for (const name in source) {
@@ -44,4 +46,7 @@ export function matchInstance(instance, Type) {
       return instance
     }
   } while (instance = instance.parentInstance);
+}
+export function isEvent(prop, val) {
+  return /^on[A-Z]+$/.test(prop) && typeof val === 'function'
 }

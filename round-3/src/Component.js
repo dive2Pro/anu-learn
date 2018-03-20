@@ -1,6 +1,6 @@
-import { getInstances, isComponent, extend, isSameType, matchInstance } from './utils'
+import { getInstances, isComponent, extend, isSameType, matchInstance, isEvent, clone } from './utils'
 import { applyComponentHook } from './lifecycle'
-function Component(props, context) {
+export function Component(props, context) {
   this.props = props
   this.context = context
   if(!this.state) {
@@ -192,7 +192,7 @@ function diffProps(dom, props, nextProps) {
       continue
     }
     const value = nextProps[value]
-    if (isEvent(name)) {
+    if (isEvent(name, value)) {
       if (!props[name]) {
         dom.addEventListener(name.slice(2).toLocaleLowerCase(), value)
       }
@@ -211,7 +211,7 @@ function diffProps(dom, props, nextProps) {
 
   for(const name in props) {
     if(!nextProps[name]) {
-      if(isEvent(name)) {
+      if(isEvent(name, props[name])) {
         dom.removeEventListener(name)
       } else {
         dom.removeAttribute(name)
