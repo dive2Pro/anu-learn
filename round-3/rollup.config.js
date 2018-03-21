@@ -3,6 +3,7 @@ export default {
   output: {
       file: 'dist/React.js',
       name: 'React',
-      format: 'umd'
+      format: 'umd',
+      exports: 'default'
   },
 }

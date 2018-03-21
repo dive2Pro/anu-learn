@@ -13,14 +13,15 @@ export function getInstances(instance) {
   return instances
 }
 export function clone(obj) {
-  return extend({}, obj)
+  const target = {}
+  extend(target, obj)
+  return target
 }
 
 export function extend(target, source = {}) {
   for (const name in source) {
     if (source.hasOwnProperty(name)) {
       target[name] = source[name]
-      
     }
   }
 }
@@ -48,5 +49,5 @@ export function matchInstance(instance, Type) {
   } while (instance = instance.parentInstance);
 }
 export function isEvent(prop, val) {
-  return /^on[A-Z]+$/.test(prop) && typeof val === 'function'
+  return /^on[A-Z]+/.test(prop) && typeof val === 'function'
 }

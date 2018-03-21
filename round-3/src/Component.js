@@ -1,5 +1,5 @@
 import { getInstances, isComponent, extend, isSameType, matchInstance, isEvent, clone } from './utils'
-import { applyComponentHook } from './lifecycle'
+import { applyComponentHook } from './lifeCycle'
 export function Component(props, context) {
   this.props = props
   this.context = context
@@ -99,7 +99,7 @@ function diff(oldDom, vnode, context, parentNode, prevVnode) {
   /**
    * 证明这是个需要 重新 生成新的 dom 的 vnode
    */
-  if (!oldDom || !isSameType(oldDom, Type)) {
+  if (!oldDom || !isSameType(oldDom, vnode)) {
     if (typeof Type === 'function') {
       let instance = prevVnode.instance
       if (instance) {
@@ -136,7 +136,7 @@ function diff(oldDom, vnode, context, parentNode, prevVnode) {
     oldDom = nextDom
   }
   diffProps(oldDom, prevProps, vnode.props)
-  diffChildren(parentNode, vnode.props.children, context, prevChildren)
+  diffChildren(oldDom, vnode.props.children, context, prevChildren)
 
   return oldDom
 }
@@ -191,11 +191,13 @@ function diffProps(dom, props, nextProps) {
     if (name === 'children') {
       continue
     }
-    const value = nextProps[value]
+    const value = nextProps[name]
     if (isEvent(name, value)) {
       if (!props[name]) {
         dom.addEventListener(name.slice(2).toLocaleLowerCase(), value)
+        props[name] = value
       }
+      continue
     }
 
     if(value !== props[name]) {
@@ -253,7 +255,7 @@ function diffChildren(parentNode, newChildren, context, oldChildren) {
             vnode.dom.nodeValue = vnode.text
           }
         } else {
-          vnode.dom = toDOM(vnode, context, parentNode, false)
+          vnode.dom = diff(old.dom, vnode, context, parentNode, old)
         }
       } else if (vnode.type === '#text') {
         vnode.dom = document.createTextNode(vnode.text)
@@ -261,7 +263,7 @@ function diffChildren(parentNode, newChildren, context, oldChildren) {
 
         removeComponent(old, parentNode)
       } else {
-        vnode.dom = toDOM(vnode, context, parentNode)
+        vnode.dom = diff(old.dom, vnode, context, parentNode, old)
       }
       delete old.dom
     } else if (!old){
@@ -288,10 +290,10 @@ function diffChildren(parentNode, newChildren, context, oldChildren) {
 export function toDOM(vnode, context, parentNode, replaced) {
   vnode = toVnode(vnode, context)
   let dom 
-  if (vnode.type === '@text') {
-    dom = document.createTextNode(dom.text)
+  if (vnode.type === '#text') {
+    dom = document.createTextNode(vnode.text)
   }else {
-    dom = document.createElement(dom.type)
+    dom = document.createElement(vnode.type)
     dom.__type = vnode.type
     // diff props? 
     diffProps(dom, {}, vnode.props)
@@ -300,7 +302,7 @@ export function toDOM(vnode, context, parentNode, replaced) {
 
   }
 
-  const instance = vnode.instance
+  let instance = vnode.instance
   // !vnode.dom  表示尚未 mount 到 DOM 中
   const canComponentDidMount = instance && !vnode.dom
 

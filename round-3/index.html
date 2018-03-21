@@ -9,10 +9,9 @@
     <script src="http://cdn.bootcss.com/react/15.4.1/react-dom.js"></script>-->
     <script>
 
-      console.log(React)
         class B extends React.Component{
         	render() {
-        		return React.createElement("div", this.props)
+        		return React.createElement("div", null, this.props.children)
             }
         }
         class Root extends React.Component {

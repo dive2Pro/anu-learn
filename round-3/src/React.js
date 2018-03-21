@@ -1,6 +1,6 @@
-import {toDom, Component} from 'Component'
+import {toDOM, Component} from './Component'
 import {extend} from './utils'
-
+import {PureComponent} from './PureComponent'
 /**
  * 
  * @param {Vnode[]} children 
@@ -24,7 +24,7 @@ function flatChildren(children, ret = []) {
       if (el  === '' || type === 'boolean') {
         continue
       }
-      if (/number|string/.test(type) || type === '@text') {
+      if (/number|string/.test(type) || type === '#text') {
         if (el === '' || el.text == '') {
           continue
         }
@@ -32,7 +32,7 @@ function flatChildren(children, ret = []) {
         if (ret.merge) {
           ret[0] = (el.type ? el.text : el) + ret[0]
         } else {
-          ret.unshift(el.type ? el : {type: el.type, text: String(el)})
+          ret.unshift(el.type ? el : {type: '#text', text: String(el)})
           ret.merge = true
         }
       } else if (Array.isArray(el)) {
@@ -84,7 +84,10 @@ function render(vnode, container) {
 const React = {
   render,
   createElement,
-  Component
+  Component,
+  PureComponent
 }
 window.ReactDOM = React
 window.React = React
+
+export default React
