@@ -38,3 +38,23 @@
 ### 实现细节
 
 在 transition 的`renderWithoutSetState` 中 (  这里已经可以确定是 Component 在更新 ), 更新全局的 `CurrentOwner` 到这个 `Component` 
+
+3.24 14:09
+stateless Component 会转化为 Component, 所以这里的 vnode 的 instance 指向的是 这个 `Component`. 也因为这样做, 所以 ref 就可以指向 stateLess Component
+
+
+## #comment
+> 如果组件的返回结果变成空, 处理这样的情况
+
+### 实现细节
+
+在 transaction 中 如果 render 返回一个 null, vnode = { type: '#comment', text: 'empty' }
+同时在 `diffChildren` 中, type 为 "#comment", 需要将 oldDom 删除
+
+
+## option | select
+
+> 输入组件 在 render 更新时, 需要根据 props 来确定呈现的状态. 这一部分是需要直接操作 dom 来实现的.
+
+在 toDOM 函数中, 会`handleSpecialNode(vnode)` 来给 vnode 添加 `_wrapperState` field
+在更新时, `postUpdateSelectedOptions` 传入的 vnode 中记录了 props
