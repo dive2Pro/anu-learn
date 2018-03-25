@@ -116,6 +116,27 @@ function mountComponent(vnode, parentContext, prevRendered) {
 
     return dom
 }
+
+function mountStateless(vnode, parentContext, prevRendered) {
+    const { type } = vnode
+    let props = getComponentProps(vnode)
+
+    let rendered = type(props, parentContext)
+    rendered = checkNull(rendered, type)
+   
+    const dom = mountVnode(rendered, getChildContext(type, parentContext), prevRendered)
+
+    vnode._instance = {
+        _currentElement: vnode,
+        _rendered: rendered
+    }
+
+    vnode._hostNode = dom
+    rendered._hostParent = vnode._hostParent
+
+    return dom
+}
+
 function mountVnode(vnode, parentContext, prevRendered) {
     const { vtype } = vnode
 

@@ -185,10 +185,44 @@ vnode更新:
     let dom = mountVnode(rendered, getChildContext(instance, parentContext), prevRendered)
 
     instanceMap.set(instance, dom)
-    vnode_hostNode = dom
+    vnode._hostNode = dom
 
     instance._disableSetState =false
 ```
 > 在 React, 我们开发者担任的是指挥交通的角色, 而每一个 Component 就好像是一个繁忙的路口, 处理着无数的 Element 在 DOM 中的位置. 好在这个世界的规则是如此的精确和严密, 我们不需要担心是否有"不法分子"不听话导致的意外发生. 
 
 Component 只关注三件事, state, props , render . 而 state 和 props 本质都是手段, 来控制 render 的返回. 纯函数的方式现在就体现出来了, 你给我的参数是一定的, 那我返回的也是一定的 --- vnode. 这是一个递归的过程, 沿途不停的接受新的组件, 不停的创造新的 vnode, Node, 不停的挂载Node 直到整个组件树都渲染和挂载完毕. 
+
+vnode 会记录它的位置 分别为 `_hostNode` 和 `_parentNode`
+
+eg: 
+```
+  function A(props) {
+    return <div id="a">{props.children}</div>
+  }
+  render(
+  <A>
+    <B />
+    <h2 />
+  </A>,
+  div#root)
+
+  
+```
+
+**要注意的是, 此时官方的 16版本还未发布, 就是说, 每一个Component都必须有一个 rootElement**
+1. _hostNode:  A : div#a, B: div#b , h2: h2
+2. _parentNode: A : div#root, B: div#a, h2: div#a
+
+更新Vnode: 
+```
+ {
+   type,
+   children,
+   props,
+   _vtype,
+   _instance,
+   _hostNode,
+   _parentNode
+ }
+```
