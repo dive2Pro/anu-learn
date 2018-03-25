@@ -175,5 +175,20 @@ vnode更新:
 ```
 这里的给 instance 添加了 一个 flag, 在其中更新了一个生命周期函数 和 instance的 state, 为什么要这么做? 探究这个问题, 需要明确一点的是 state 的更新策略. 在 React 中, state 的更新不是 sync 的, state 的更新会触发 视图的更新, 那就必须要避免 一段 代码中多次 state更新 导致 view 更新的计算太过频繁. 这个 React做的就是引入 `事务机制`
 
+```
 
-    在 React, 我们开发者担任的是指挥交通的角色, 而每一个 Component 就好像是一个繁忙的路口, 处理着无数的 Element 在 DOM 中的位置. 好在这个世界的规则是如此的精确和严密, 我们不需要担心是否有"不法分子"不听话导致的意外发生. 
+    const rendered = safeRenderComponent(instance, type)
+
+    instance._rendered =  rendered
+    rendered._hostParent = vnode._hostParent
+
+    let dom = mountVnode(rendered, getChildContext(instance, parentContext), prevRendered)
+
+    instanceMap.set(instance, dom)
+    vnode_hostNode = dom
+
+    instance._disableSetState =false
+```
+> 在 React, 我们开发者担任的是指挥交通的角色, 而每一个 Component 就好像是一个繁忙的路口, 处理着无数的 Element 在 DOM 中的位置. 好在这个世界的规则是如此的精确和严密, 我们不需要担心是否有"不法分子"不听话导致的意外发生. 
+
+Component 只关注三件事, state, props , render . 而 state 和 props 本质都是手段, 来控制 render 的返回. 纯函数的方式现在就体现出来了, 你给我的参数是一定的, 那我返回的也是一定的 --- vnode. 这是一个递归的过程, 沿途不停的接受新的组件, 不停的创造新的 vnode, Node, 不停的挂载Node 直到整个组件树都渲染和挂载完毕. 

@@ -1,3 +1,8 @@
+import {scheduler} from './scheduler'
+import {CurrentOwner} from './CurrentOwner'
+import {instanceMap} from './instanceMap'
+import {options} from './util'
+
 /**
  *  收集元素的孩子
  * @param {Node} dom 
@@ -28,6 +33,38 @@ function mountElement(vnode, parentContext, prevRendered) {
 
 }
 
+function checkNull(vnode, type) {
+    if (Array.isArray(vnode) && vnode.length === 1) {
+        vnode = vnode[0]
+    }
+    if (!vnode) {
+        return {
+            type: '#comment',
+            text: 'empty'
+        }
+    } else if(!vnode.vtype) {
+        throw new Error(`
+        @${type.name}#render: You may have returned undefined, an array or some other invalid object
+        `)
+    }
+    return vnode
+}
+function safeRenderComponent(instance, type) {
+    CurrentOwner.cur = instance
+    let rendered = instance.render()
+    rendered = checkNull(rendered, type)
+
+    CurrentOwner.cur = null
+    return rendered
+}
+
+function getChildContext(instance, parentContext) {
+    if (instance.getChildContext) {
+        return { parentContext, ...instance.getChildContext()}
+    }
+    return {...parentContext}
+}
+
 function mountComponent(vnode, parentContext, prevRendered) {
     const { type } = vnode
     let props = getComponentProps(vnode)
@@ -46,7 +83,38 @@ function mountComponent(vnode, parentContext, prevRendered) {
     } else {
         instance.componentWillMount = null
     }
-    
+
+    const rendered = safeRenderComponent(instance, type)
+
+    instance._rendered =  rendered
+    rendered._hostParent = vnode._hostParent
+
+    let dom = mountVnode(rendered, getChildContext(instance, parentContext), prevRendered)
+
+    instanceMap.set(instance, dom)
+    vnode_hostNode = dom
+
+    instance._disableSetState =false
+
+    if (instance.componentDidMount) {
+        scheduler.add(instance)
+    } else {
+        instance._hasDidMount = true
+        if (instance._pendingCallbacks.length) {
+            scheduler.add(instance)
+        }
+    }
+
+    if (vnode.ref) {
+        scheduler.add(function() {
+            vnode.ref(instance)
+        })
+    }
+
+    options.afterMount(instance)
+    vnode._hostNode = dom
+
+    return dom
 }
 function mountVnode(vnode, parentContext, prevRendered) {
     const { vtype } = vnode
