@@ -29,9 +29,6 @@ function createDOMElement(vnode) {
     return document.createElement(type)
 }
 
-function mountElement(vnode, parentContext, prevRendered) {
-
-}
 
 function checkNull(vnode, type) {
     if (Array.isArray(vnode) && vnode.length === 1) {
@@ -49,6 +46,7 @@ function checkNull(vnode, type) {
     }
     return vnode
 }
+
 function safeRenderComponent(instance, type) {
     CurrentOwner.cur = instance
     let rendered = instance.render()
@@ -63,6 +61,105 @@ function getChildContext(instance, parentContext) {
         return { parentContext, ...instance.getChildContext()}
     }
     return {...parentContext}
+}
+
+function genMountElement(vnode, type, prevRendered) {
+    if (prevRendered && toLowerCase(prevRendered) === type) {
+        return prevRendered
+    } else {
+        const dom = document.createElement(vnode)
+        if (prevRendered && dom !== prevRendered) {
+            while(prevRendered.firstChild) {
+                dom.appendChild(prevRendered.firstChild)
+            }
+        }
+        return dom
+    }
+}
+
+function diffProps(){
+    
+}
+
+
+function mountChildren(vnode, parentNode, parentContext) {
+    vnode.props.children.map(function mount(el) {
+        el._hostParent = vnode
+
+        const curNode = mountVnode(el, parentContext)
+
+        parentNode.appendChild(curNode)
+    })
+}
+/**
+ * 对齐 Children? 什么意思呢?
+ * 
+ * 现在假设 所有的childNodes 与 mountVnode 生成的dom 没有 === 的
+ * 那么 此时 dom 结构是这样的: 
+ * ```
+ * <parentNode>
+ * <vnode.props.children.map(mountVnode) />
+ * <childNodes/>
+ * 
+ * </parentNode>
+ * ```
+ * @param {VNode} vnode 
+ * @param {Node} parentNode 
+ * @param {Object} parentContext 
+ * @param {Node[]} childNodes 
+ */
+function  alignChildren(vnode, parentNode , parentContext, childNodes) {
+    const children = vnode.props.children
+    let    insertPoint = childNodes[0] || null
+    let j = 0 
+
+    for (let i = 0, n = children.length ; i < n ; i ++) {
+        let el = children[i]
+
+        el._hostParent = vnode
+        const prevDom = childNodes[j]
+
+        const dom = mountVnode(el , parentContext, prevDom)
+
+        if (dom === prevDom) {
+            j ++
+        }
+        /**
+         * 操作DOM
+         */
+        parentNode.insertBefore(dom, insertPoint)
+
+        insertPoint = dom.nextSibling
+    }
+
+}
+
+function mountElement(vnode, parentContext, prevRendered) {
+    const {type, props} = vnode
+    const dom = genMountElement(vnode, type, prevRendered)
+
+    vnode._hostNode = dom
+
+    if(prevRendered) {
+        alignChildren(vnode, dom, parentContext, prevRendered.childNodes)
+    } else {
+        mountChildren(vnode, dom, parentContext)
+    }
+
+    if(vnode.checkProps) {
+        diffProps(props, {}, vnode, {}, dom)
+    }
+
+    if(vnode.ref) {
+        scheduler.add(function() {
+            vnode.ref(dom)
+        })
+    }
+    if(formElements[type]) {
+        processFormElement(vnode, dom, props)
+    }
+
+    return dom;
 }
 
 function mountComponent(vnode, parentContext, prevRendered) {

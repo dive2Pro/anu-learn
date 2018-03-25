@@ -226,3 +226,27 @@ eg:
    _parentNode
  }
 ```
+
+```
+  func alignChildren(){
+    ...
+    parentNode.insertBefore(dom, insertPoint)
+    
+    insertPoint = dom.nextSibling
+    ...
+  }
+
+```
+
+操作 `insertBefore` 会把 dom 插入到 insertPoint 的前一个位置. 此时dom是这样的
+
+```
+  dom
+  insertPoint
+```
+insertPoint 其实指向的还是 原来的自己
+
+----
+
+不论是 StatelessComponent 还是 Component, 最后都会借用 mountVnode 来不断打薄自己的层级, 所以 也只有在 mountElement的时候需要去 diffProps 然后将这些 真正影响到 DOM 的 Attribute 挂载到 DOM 上面去.
+
