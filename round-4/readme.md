@@ -28,7 +28,7 @@
     ... // 还有其他的属性
   }
   ```
-  随着进程的不断推进, 我们会慢慢补充进来那些隐藏的属性.
+随着进程的不断推进, 我们会慢慢补充进来那些隐藏的属性.
 
 ## render
 
@@ -43,10 +43,137 @@ class App extends React.Component {
 React.render(<App />, document.getElementById('root'))
 ```
 
-这是我们使用的方式, 很简单,只有 Component 和 Element ,但不涉及 update, 不涉及 props, setState 这些, 就从这里开始, 来看看React 是如何将这个 Component 渲染到真实的 DOM 上面的.
+这是我们使用的方式, 很简单,只有 Component 和 Element , 但不涉及 update, 不涉及 props, setState 这些, 就从这里开始, 来看看React 是如何将这个 Component 渲染到真实的 DOM 上面的.
 
+```
+  var prevVnode = container._component
+      rootNode
+      hostParent = {
+        _hostNode: container
+      }
+```
 
+从 container中 获取`_component`, 一个 Vnode.
+从此可以知道 在 React 中不仅是 vnode 会参与, 真实的 Node 也会记录一些对象.
+那么这个 `_compoennt` 它表示的是否就是之前一轮render 时 传入的vnode?
+
+```
+  if (!prevVnode) {
+    genVnodes(...args) {
+      remove container children = (el) =>  if ('data-reactroot) { prevRendered = el } else {
+        remove el
+      }
+
+      vnode._hostParent = hostParent
+
+      mountVnode(vnode, parentContext, prevRendered)
+    }
+  }
+```
+
+出现第一个  vnode 的隐藏field `_hostParent`, 之所以说它是隐藏的是由于 在 js 中 以`_`开头的field默认是`private`的, 这也是无奈之举. 所以 vnode = : 
+```
+  {
+    type,
+    children,
+    props,
+    _hostParent: {
+      _hostNode: container
+    }
+  }
+```
+
+**mountVnode**, 这是最重要的函数, 就是从这里 React 把 Vnode 转化为真实的DOM, 当然在 官方的 React中 这一步是交由 `React-DOM`或者`React-Native` 等等自己去实现的.
+
+```
+function mountVnode(vnode, parentContext, prevRendered) {
+    const { vtype } = vnode
+
+    switch(vtype) {
+        case 1:
+            return mountElement(vnode, parentContext, prevRendered)
+        case 2:
+            return mountComponent(vnode, parentContext, prevRendered)
+        case 4:
+            return mountStateless(vnode, parentContext, prevRendered)
+        default:
+            const node = prevRendered && prevRendered.nodeName === vnode.type ?
+                            prevRendered
+                            :   createDOMElement(vnode)
+            vnode._hostNode = node
+            return node
+    }
+}
+TODO: 这里的 default 是在什么情况下出现的呢?
+
+```
+vnode更新: 
+```
+{
+    type,
+    children,
+    props,
+    _hostParent,
+    vtype: 数字, 记录的是 vnode 的类型, 在 React 中最小的单位是 VNode, 分为几类:
+          1. <h2>Hello Wolrd</h2>, 这是 Element, 以 小写字母开头
+          2. <MyComponent />, 这是 Component, 以大写字母开头
+          4. <MyComponent2 >, 和 2 一样的用法, 区别在于 它是 Stateless
+}
+```
+
+例子中的 <App /> 的 vnode是这样的: 
+
+```
+  {
+    type: App,
+    children: null,
+    props: null,
+    _hostParent: {
+      _hostNode: <div id="root">
+    },
+    vtype: 2
+  }
+
+```
+### 进入 `mountComponent`, 
+```
+    const { type } = vnode
+    let props = getComponentProps(vnode)
+
+    const instance = new type(props, parentContext)
+
+    vnode._instance = instance
+    instance._currentElement = vnode
+    instance.context = instance.context || parentContext
+```
+这里将 instance 和 vnode 做互相引用:
+```
+  {
+    type: App,
+    children: null,
+    props: null,
+    vtype: 2,
+    _hostParent: {
+      _hostNode: <div id="root">
+    },
+    _instance: new this.type(this.props, {})
+                >| &._currentElement = this
+                >| *.context = {}
+  }
+```
+```
+...
+    if (instance.componentWillMount) {
+        instance._disableSetState = true
+        instance.componentWillMount()
+        instance.state = instance._processPendingState()
+        instance._disableSetState = false
+    } else {
+        instance.componentWillMount = null
+    }
+...
+```
+这里的给 instance 添加了 一个 flag, 在其中更新了一个生命周期函数 和 instance的 state, 为什么要这么做? 探究这个问题, 需要明确一点的是 state 的更新策略. 在 React 中, state 的更新不是 sync 的, state 的更新会触发 视图的更新, 那就必须要避免 一段 代码中多次 state更新 导致 view 更新的计算太过频繁. 这个 React做的就是引入 `事务机制`
 
 
     在 React, 我们开发者担任的是指挥交通的角色, 而每一个 Component 就好像是一个繁忙的路口, 处理着无数的 Element 在 DOM 中的位置. 好在这个世界的规则是如此的精确和严密, 我们不需要担心是否有"不法分子"不听话导致的意外发生. 
-
