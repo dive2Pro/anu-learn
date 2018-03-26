@@ -364,5 +364,40 @@ function triggerEventFlow(paths, prop, e) {
 
 ```
 
+diffProps => isEvent => {
+
+  events = dom.__events
+
+  val = dom[prop]
+
+  if val === false :
+    delete events[prop]
+  else && not in the old props : 
+
+    _name = browserName(prop)
+    addGlobalEvent([_name]) {
+      globalEvent[prop] = true
+      // 事件兼容 
+      addEvent(document, prop, SyntheticEvent =  e => {
+        包装 event 事件
+        ...
+        stopPropagation: () => this._stopPropagation = true //标记位
+        ...
+
+        事件触发的时候 会根据 event.target.parentNode 去收集沿途有 dom.__events 有 这个 prop 的dom 和这个 prop
+
+        先触发一次 capture 方法
+
+        如果没有 _stopPropagation === true 
+
+        触发  bubble
+      })
+    }
+
+    if prop 是不 bubble 的 事件:
+       添加 事件到 dom
+
+    添加事件到 dom.__events
+}
 
 
