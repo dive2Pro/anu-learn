@@ -1,4 +1,4 @@
-import {noop, typeNumber} from './util'
+import {noop, typeNumber, toLowerCase} from './util'
 import {addGlobalEventListener, getBrowserName} from './event'
 var globalEvents = {};
 

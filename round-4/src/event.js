@@ -4,6 +4,14 @@ import { isFn, noop } from "./util";
 export var eventHooks = {}; //用于在元素上绑定特定的事件
 
 export var isTouch = "ontouchstart" in document;
+//根据onXXX得到其全小写的事件名, onClick --> click, onClickCapture --> click,
+// onMouseMove --> mousemove
+
+export var eventLowerCache = {
+  onClick: "click",
+  onChange: "change",
+  onWheel: "wheel"
+};
 
 function collectPaths(e) {
   var target = e.target;
@@ -39,7 +47,7 @@ export function dispatchEvent(e) {
 
   // 修复 ie 等事件传递的不同处
   var hook = eventPropHooks[bubble];
-  
+
   if (hook && false === hook(e)) {
     return;
   }

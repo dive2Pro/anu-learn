@@ -291,5 +291,78 @@ insertPoint 其实指向的还是 原来的自己
 
 ```
 
+```
+export function addGlobalEventListener(name) {
+  if (!globalEvents[name]) {
+    globalEvents[name] = true;
+    addEvent(document, name, dispatchEvent);
+  }
+}
+
+export function dispatchEvent(e) {
+  //__type__ 在injectTapEventPlugin里用到
+  var bubble = e.__type__ || e.type;
+
+  e = new SyntheticEvent(e);
+
+  // 修复 ie 等事件传递的不同
+  var hook = eventPropHooks[bubble];
+
+  if (hook && false === hook(e)) {
+    return;
+  }
+
+  var paths = collectPaths(e);
+
+  var captured = bubble + "capture";
+
+  scheduler.run();
+  // capture 是从 顶 到 底
+  triggerEventFlow(paths, captured, e);
+
+  // e 是 SyntheticEvent, 如果 capture 的这一次有调用 则不会进入 bubble 
+  if (!e._stopPropagation) {
+    //  bubble 是从 底 到 顶
+    triggerEventFlow(paths.reverse(), bubble, e);
+  }
+}
+
+
+function collectPaths(e) {
+  var target = e.target;
+  var paths = [];
+  do {
+    // 这里可以拿到 之前在 diffProps 时传入给 dom.__events 的 属性
+    // 也只有 props 有 event 的 dom 才会收集
+    // 收集的都是 function
+    var events = target.__events;
+    if (events) {
+      paths.push({ dom: target, events: events });
+    }
+  } while ((target = target.parentNode) && target.nodeType === 1);
+  // target --> parentNode --> body --> html
+  return paths;
+}
+
+function triggerEventFlow(paths, prop, e) {
+  for (var i = paths.length; i--; ) {
+    var path = paths[i];
+    
+    var fn = path.events[prop];
+    if (isFn(fn)) {
+      e.currentTarget = path.dom;
+      fn.call(path.dom, e);
+
+      // 包装 e, 这就是好处, 这个 status 就保存下来了
+      if (e._stopPropagation) {
+        break;
+      }
+    }
+  }
+}
+
+
+```
+
 
 

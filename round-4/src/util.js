@@ -16,7 +16,7 @@ var numberMap = {
     "[object Symbol]": 6,
     "[object Array]": 7
   };
-  
+
 // undefined: 0, null: 1, boolean:2, number: 3, string: 4, function: 5, array: 6, object:7
 export function typeNumber(data) {
     if (data === void 666) {
@@ -24,4 +24,15 @@ export function typeNumber(data) {
     }
     var a = numberMap[__type.call(data)];
     return a || 8;
+  }
+
+  /**
+ * 小写化的优化
+ * 
+ * @export
+ * @param {any} s 
+ * @returns 
+ */
+export function toLowerCase(s) {
+    return lowerCache[s] || (lowerCache[s] = s.toLowerCase());
   }
