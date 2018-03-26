@@ -3,6 +3,8 @@ import {CurrentOwner} from './CurrentOwner'
 import {instanceMap} from './instanceMap'
 import {options} from './util'
 import {diffProps} from './diffProps'
+import {processFormElement} from './ControlledComponent'
+
 /**
  *  收集元素的孩子
  * @param {Node} dom 
@@ -132,15 +134,13 @@ function  alignChildren(vnode, parentNode , parentContext, childNodes) {
 
 }
 
-function mountElement(vnode, parentContext, prevRendered) {
+function mountElement(vnode, parentContext, prevRendered) { 
+    
     const {type, props} = vnode
-    const dom = genMountElement(vnode, type, prevRendered)
-
-    vnode._hostNode = dom
-
-    if(prevRendered) {
-        alignChildren(vnode, dom, parentContext, prevRendered.childNodes)
-    } else {
+    const dom = genMountElement(vnode, type, prevRendered) 
+    vnode._hostNode = dom 
+    if(prevRendered) { 
+        alignChildren(vnode, dom, parentContext, prevRendered.childNodes) } else {
         mountChildren(vnode, dom, parentContext)
     }
 

@@ -400,4 +400,54 @@ diffProps => isEvent => {
     添加事件到 dom.__events
 }
 
+## FormElement
+
+> Form Element -- input textarea -- 的值是由 attribute `value` 决定的, 所以在 diffProps 时, 给DOM setAttribute('value', val) , 就可以达到目的.
+
+我们会在使用的过程中, 使用 ControlledComponent, 如果给 FormElement 添加了 value Prop, 但是没有handle 它的 `onchange` 或者 `oninput` 等事件, 那么这个就是一个 非受控组件, 用户无法通过输入改变元素的值.
+
+> **这里代码中使用的是 <<重构>> 第一章中的技术. 可以好好体会**
+
+这里会说多一点 关于 options 的处理
+```
+export function postUpdateSelectedOptions(vnode) {
+  var props = vnode.props,
+    multiple = !!props.multiple,
+    value =
+      typeNumber(props.value) > 1
+        ? props.value
+        : typeNumber(props.defaultValue) > 1
+          ? props.defaultValue
+          : multiple ? [] : "",
+    options = [];
+    // 收集 options, optgroup只是将 option 分类, select 只考虑optionNode
+  collectOptions(vnode, props, options);
+  if (multiple) {
+    updateOptionsMore(options, options.length, value);
+  } else {
+    updateOptionsOne(options, options.length, value);
+  }
+}
+```
+updateOptionsMore || updateOptionsOne 都会调用 `getOptionValue` 来获取option 的值
+
+```
+function getOptionValue(option, props) {
+  if (!props) {
+    return getDOMOptionValue(option);
+  }
+  return props.value === undefined ? props.children[0].text : props.value;
+}
+
+function getDOMOptionValue(node) {
+  if (node.hasAttribute && node.hasAttribute("value")) {
+    return node.getAttribute("value");
+  }
+  var attr = node.getAttributeNode("value");
+  if (attr && attr.specified) {
+    return attr.value;
+  }
+  return node.innerHTML.trim();
+}
+```
 
