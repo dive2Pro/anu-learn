@@ -2,7 +2,7 @@ import {scheduler} from './scheduler'
 import {CurrentOwner} from './CurrentOwner'
 import {instanceMap} from './instanceMap'
 import {options} from './util'
-
+import {diffProps} from './diffProps'
 /**
  *  收集元素的孩子
  * @param {Node} dom 
@@ -77,9 +77,7 @@ function genMountElement(vnode, type, prevRendered) {
     }
 }
 
-function diffProps(){
-    
-}
+
 
 
 function mountChildren(vnode, parentNode, parentContext) {

@@ -43,7 +43,7 @@ class App extends React.Component {
 React.render(<App />, document.getElementById('root'))
 ```
 
-这是我们使用的方式, 很简单,只有 Component 和 Element , 但不涉及 update, 不涉及 props, setState 这些, 就从这里开始, 来看看React 是如何将这个 Component 渲染到真实的 DOM 上面的.
+这是我们使用的方式, 很简单,只有 Component 和 Element , 不涉及 update, 不涉及 props, setState 这些, 就从这里开始, 来看看React 是如何将这个 Component 渲染到真实的 DOM 上面的.
 
 ```
   var prevVnode = container._component
@@ -107,6 +107,10 @@ function mountVnode(vnode, parentContext, prevRendered) {
 TODO: 这里的 default 是在什么情况下出现的呢?
 
 ```
+
+不论是 StatelessComponent 还是 Component, 最后都会借用 mountVnode 来不断打薄自己的层级 -- 在正常的使用过程中, Element 是不会直接和我们打交道的, 它一定是作为某个 Component 的child 存在 -- 这里的 `case 4` 和 `case 2`都会回调到这里, 走 `case 1 ` 这个 branch.
+
+
 vnode更新: 
 ```
 {
@@ -210,9 +214,10 @@ eg:
   
 ```
 
-**要注意的是, 此时官方的 16版本还未发布, 就是说, 每一个Component都必须有一个 rootElement**
-1. _hostNode:  A : div#a, B: div#b , h2: h2
-2. _parentNode: A : div#root, B: div#a, h2: div#a
+    > **要注意的是, 此时官方的 16版本还未发布, 就是说, 每一个Component都必须有一个 rootElement**
+
+    1. _hostNode:  A : div#a, B: div#b , h2: h2
+    2. _parentNode: A : div#root, B: div#a, h2: div#a
 
 更新Vnode: 
 ```
@@ -248,5 +253,43 @@ insertPoint 其实指向的还是 原来的自己
 
 ----
 
-不论是 StatelessComponent 还是 Component, 最后都会借用 mountVnode 来不断打薄自己的层级, 所以 也只有在 mountElement的时候需要去 diffProps 然后将这些 真正影响到 DOM 的 Attribute 挂载到 DOM 上面去.
+只有在 mountElement的时候需要去 diffProps 然后将这些 真正影响到 DOM 的 Attribute 挂载到 DOM 上面去.
+
+
+## Event
+
+> DOM 中的事件遵循 冒泡原则,  而由于写法的 不同 -- (`<div onClick={this.handleClick}></div>`), 事件冒泡也需要适应这样的改变. 同时 组件在更新时, dom 属性和事件的改变 也是声明式的, 而频繁的给每一个 Node 添加或者删除事件, 会造成性能上面的问题. React 是如何解决的呢?
+
+```
+ __event__: function(dom, name, val, lastProps) {
+   // __events 是dom 上面所有挂载事件的集合
+   // **好奇js 中对象传递方式的 可以 戳这里 http://bosn.me/js/js-call-by-sharing/** 
+    let events = dom.__events || (dom.__events = {});
+
+    if (val === false) {
+      // 如果下一次 render 时, 传入的 事件的 值为 false, 则直接从 __events 中删除这个事件
+      delete events[toLowerCase(name.slice(2))];
+    } else {
+      if (!lastProps[name]) {
+        //添加全局监听事件
+        // 浏览器事件名称兼容
+        var _name = getBrowserName(name);
+        // ** 全局 Event 收集**
+        addGlobalEventListener(_name);
+        // 注意的是这里收集的是 不冒泡的事件, 所以需要添加到指定的 dom 上面
+        // **好奇 dom 中哪些事件不冒泡 戳这里 http://www.cnblogs.com/rubylouvre/p/5080464.html**
+        var hook = eventHooks[_name];
+        if (hook) {
+          hook(dom, name);
+        }
+      }
+      // 添加到 dom.__events 中
+      //onClick --> click, onClickCapture --> clickcapture
+      events[toLowerCase(name.slice(2))] = val;
+    }
+  },
+
+```
+
+
 
