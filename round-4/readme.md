@@ -451,3 +451,54 @@ function getDOMOptionValue(node) {
 }
 ```
 
+
+## setState
+
+> setState 会触发 Component rerender. React 不知道你改变的是什么, 更新的策略就是 和上一次生成的比较.
+
+### lifeCycle
+
+1. 组件挂载的过程
+  ```
+    mountComponent(..., mountQueue) {
+
+      instance = new type(props, context) // constructor
+
+      if (instance.componentWillMount) {
+        instance.componentWillMount(props, state, context)
+        instance.state = instance.__mergeStates(props, context)
+      }
+      ...
+      renderComponent(instance) // render
+      // 收集将要 mount 的 组件 componentDidMount
+      mountQueue.push(instance)
+    }
+
+    ...
+
+    renderByAnu() {
+      let mountQueue = [] 
+
+      genVnodes(..., mountQueue) // 不停的收集组件的实例
+
+      clearRefsAndMounts(mountQueue)
+    }
+
+    clearRefsAndMounts(queue) {
+      queue.forEach(el => {
+        
+        if (el.componentDidMount) {
+          el.componentDidMount()
+          el.componentDidMount = null // 置空, 避免下次 更新时调用
+        }
+
+        clearArray(el.__pendingCallbacks).forEach(fn => {
+          fn.call(el)
+        })
+        el.__hasDidMount = true
+      })
+      queue.length = 0 // 置空数组
+    }
+  ```
+2. 组件更新的过程
+  
