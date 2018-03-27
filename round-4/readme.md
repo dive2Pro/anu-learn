@@ -485,6 +485,7 @@ function getDOMOptionValue(node) {
     }
 
     clearRefsAndMounts(queue) {
+      // 队列是从里到外的, 就保证了 父组件一定是在所有子组件 mounted 之后 mounted 的
       queue.forEach(el => {
         
         if (el.componentDidMount) {
@@ -501,4 +502,32 @@ function getDOMOptionValue(node) {
     }
   ```
 2. 组件更新的过程
-  
+
+> "面向切面编程", 在 anu 中随处可见这种模式, 降低了耦合性, 增加可测试性
+
+```
+ /*
+    * this.__dirty = true 表示组件不能更新
+    * this.__hasRendred = true 表示组件已经渲染了一次
+    * this.__rerender = true 表示组件需要再渲染一次
+    * this.__hasDidMount = true 表示组件及子孙已经都插入DOM树
+    * this.__updating = true 表示组件处于componentWillUpdate与componentDidUpdate中
+    * this.__forceUpdate = true 用于强制组件更新，忽略shouldComponentUpdate的结果
+    */
+```
+ --- 在 Component 的 constructor 方法中, 提供了大部分标志位的解释
+
+forceUpdate -> __forceUpdate = true , 同步进入更新 refreshComponent(this, [])
+
+setState 分为三种情况 -> 
+  1. 组件在 更新过程中 调用 setState
+      子组件 在 willReceiveProps 函数中调用 父组件的 setState 时. 
+      React 会将这一次调用是设置的 cb devolve 到 "__tempUpdateCbs"属性中,
+      并设置 __rerender = true
+      这样, 在上次 update 完成之后, 父组件重新rerender
+  2. 组件在 didMount 方法中调用
+      将回调延迟到 didUpdate 中后执行, 也是 devolve __pendingCallback 到 "__tempUpdateCbs"
+      ->
+        在下一次 refreshComponent 之前 __pendingCallbacks = "__tempUpdateCbs"
+  3. 正常事件出发
+      refreshComponent

@@ -3,8 +3,9 @@ import { CurrentOwner } from "./CurrentOwner";
 import { instanceMap } from "./instanceMap";
 import { options } from "./util";
 import { diffProps } from "./diffProps";
-import { processFormElement } from "./ControlledComponent";
-
+import { processFormElement, postUpdateSelectedOptions } from "./ControlledComponent";
+import {disposeVnode} from './dispose'
+const HTML_KEY = "dangerouslySetInnerHTML"
 /**
  *  收集元素的孩子
  * @param {Node} dom
@@ -101,6 +102,17 @@ StateLess.prototype.render = function(vnode, context) {
 
     return rendered
 }
+
+function updateStateless(lastTypeVnode, nextTypeVnode, node, context, mountQueue) {
+    const instance = lastTypeVnode._instance
+    const lastVnode = lastTypeVnode._renderedVnode
+    const nextVnode = instance.render(nextTypeVnode, context)
+
+    const dom = alignVnodes(lastVnode, nextVnode, node, context, mountQueue)
+
+    nextTypeVnode._hostNode = nextVnode._hostNode = dom
+    return dom
+}
 function mountStateless(vnode, context, prevRendered, mountQueue) {
 
     const instance = new StateLess(vnode.type)
@@ -166,6 +178,42 @@ function alignChildren(vnode, parentNode, parentContext, mountQueue) {
   }
 }
 
+function updateElement(lastVnode, nextVnode, dom, context, mountQueue) {
+    const nextProps = nextVnode.props
+    const lastProps = lastVnode.props
+
+    if (nextProps[HTML_KEY]) {
+        lastProps.children.forEach(el => {
+            disposeVnode(el)
+        })
+    } else {
+        if (lastProps[HTML_KEY]) {
+            while (dom.firstChild) {
+                dom.removeChild(dom.firstChild)
+            }
+            mountChildren(nextVnode, dom, context, mountQueue)
+        } else {
+            updateChildren(lastVnode, nextVnode, dom, context, mountQueue)
+        }
+    }
+
+    nextVnode._hostNode = dom
+
+    if (lastVnode.checkProps || nextVnode.checkProps) {
+        diffProps(nextProps, lastProps, nextVnode, lastVnode, dom)
+    }
+
+    if (nextVnode.type === 'select') {
+        postUpdateSelectedOptions(nextVnode)
+    }
+
+    if (nextProps.ref) {
+        nextProps.ref(node)
+    }
+
+    return dom
+}
+
 function mountElement(vnode, parentContext, prevRendered, mountQueue) {
   const { type, props, _owner, ref } = vnode;
   const dom = genMountElement(vnode, type, prevRendered);
@@ -185,6 +233,31 @@ function mountElement(vnode, parentContext, prevRendered, mountQueue) {
   }
 
   return dom;
+}
+
+function updateComponent(lastVnode, nextVnode, node, context, mountQueue) {
+    let instance = nextVnode._instance = lastVnode._instance;
+    instance._nextElement = nextVnode;
+
+    let nextProps = getComponentProps(nextVnode);
+    instance.lastProps = instance.props;
+    instance.lastContext = instance.context;
+
+    if (instance.componentWillReceiveProps) {
+        // 阻止 setState 更新, 保存到 __pendingStates中
+        // 在 refreshComponent 方法中 __mergeStates
+        instance.__dirty = true;
+        instance.componentWillReceiveProps(nextProps, context);
+        instance.__dirty = false
+    }
+
+    instance.props = nextProps;
+    instance.context = context;
+    if (nextVnode.ref) {
+        nextVnode.ref(instance);
+    }
+    return refreshComponent(instance, mountQueue);
+
 }
 
 function mountComponent(vnode, context, prevRendered, mountQueue) {
@@ -233,6 +306,14 @@ let patchAdapter = {
   12: updateComponent,
   14: updateStateless
 };
+
+function updateText(lastVnode, nextVnode, dom) {
+    nodeValue._hostNode = dom
+    if (lastVnode.text !== nextVnode.text) {
+        dom.nodeValue = nextVnode.text
+    }
+    return dom
+}
 function mountText(vnode, context, prevRendered) {
   let node =
     prevRendered && prevRendered.nodeName === vnode.type
@@ -334,6 +415,36 @@ function _refreshComponent(instance, dom, mountQueue) {
   return dom;
 }
 
+const isStandard = "textContext" in document
+const fragment = document.createDocumentFragment()
+
+function emptyElement(node) {
+    let child 
+    while((child = node.firstChild)) {
+        if (child.nodeType === 1) {
+            emptyElement(child)
+        }
+        node.removeChild(child)
+    }
+}
+
+function removeDOMElement(node) {
+    if (node.nodeType === 1) {
+        if (isStandard) {
+            node.textContent = ""
+        } else {
+            emptyElement(node)
+        }
+    } else if (node.nodeType === 3) {
+        recyclables["#text"].push(node)
+    }
+    fragment.appendChild(node)
+    fragment.removeChild(node)
+}
+
+function updateVnode(lastVnode, nextVnode, node, context, mountQueue) {
+    return patchAdapter[lastVnode.vtype + 10] (lastVnode, nextVnode, node, context, mountQueue)
+}
 function alignVnodes(lastVnode, nextVnode, node, context, mountQueue) {
   let dom = node;
 
@@ -345,6 +456,8 @@ function alignVnodes(lastVnode, nextVnode, node, context, mountQueue) {
   ) {
     disposeVnode(lastVnode);
 
+    // 检查是否是 顶端传入 还是 组件自更新
+    // 如果组件自更新, 这里需要重新生成组件树, 所以 innerMountQueue 需要置空
     let innerMountQueue = mountQueue.mountAll ? mountQueue : [];
 
     dom = mountVnode(nextVnode, context, null, innerMountQueue);
